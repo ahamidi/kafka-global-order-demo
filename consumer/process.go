@@ -5,12 +5,16 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/fatih/color"
 )
 
 // Outputs messages as soon they are received
 func processMessages(in chan kafka.Message) {
+
+	var lastMessage kafka.Message
 	for m := range in {
-		log.Printf("Received Message: %s @ %s", string(m.Value), m.Timestamp.String())
+		printMessage(&lastMessage, m)
+		lastMessage = m
 	}
 }
 
@@ -18,4 +22,18 @@ func processMessages(in chan kafka.Message) {
 // the time window
 func processMessagesInOrder(in chan kafka.Message, timeWindow *time.Time) {
 
+}
+
+func printMessage(lastMessage *kafka.Message, currentMessage kafka.Message) {
+	red := color.New(color.FgRed).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+
+	mts := currentMessage.Timestamp
+	var tsString string
+	if lastMessage != nil && lastMessage.Timestamp.After(mts) {
+		tsString = red(currentMessage.Timestamp.String())
+	} else {
+		tsString = green(currentMessage.Timestamp.String())
+	}
+	log.Printf("Received Message: %s:%s @ %s on partition %d", string(currentMessage.Key), string(currentMessage.Value), tsString, currentMessage.TopicPartition.Partition)
 }

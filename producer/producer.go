@@ -2,6 +2,7 @@ package producer
 
 import (
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -29,7 +30,7 @@ func (p *Producer) Run() {
 	for {
 		select {
 		case <-ticker.C:
-			produceMessage(p, "", "test", oldTimestamp(5))
+			produceMessage(p, strconv.Itoa(rand.Intn(32)), "test", oldTimestamp(5))
 		}
 	}
 
