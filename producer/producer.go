@@ -1,6 +1,7 @@
 package producer
 
 import (
+	"math/rand"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -24,9 +25,12 @@ func New(c *kafka.ConfigMap, topic string) (*Producer, error) {
 
 // Run blocking producer
 func (p *Producer) Run() {
+	ticker := time.NewTicker(500 * time.Millisecond)
 	for {
-		produceMessage(p, "", "test", nil)
-		time.Sleep(3 * time.Second)
+		select {
+		case <-ticker.C:
+			produceMessage(p, "", "test", oldTimestamp(5))
+		}
 	}
 
 }
@@ -43,4 +47,12 @@ func produceMessage(p *Producer, key, message string, timestamp *time.Time) erro
 	}
 
 	return p.Produce(pm, nil)
+}
+
+// returns timestamp that is up to max seconds ago
+func oldTimestamp(maxSeconds int) *time.Time {
+	goBack := rand.Intn(maxSeconds)
+	ts := time.Now().Add(-(time.Duration(goBack) * time.Second))
+
+	return &ts
 }

@@ -1,7 +1,6 @@
 package consumer
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -59,8 +58,7 @@ func (c *Consumer) filterMessages(messages chan kafka.Message) {
 			case kafka.RevokedPartitions:
 				c.Unassign()
 			case *kafka.Message:
-				fmt.Printf("%% Message on %s:\n%s\n",
-					e.TopicPartition, string(e.Value))
+				messages <- *e
 			case kafka.Error:
 				log.Println("Error:", e)
 				break

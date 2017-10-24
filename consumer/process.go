@@ -10,7 +10,7 @@ import (
 // Outputs messages as soon they are received
 func processMessages(in chan kafka.Message) {
 	for m := range in {
-		log.Printf("Received Message: %s", m.String())
+		log.Printf("Received Message: %s @ %s", string(m.Value), m.Timestamp.String())
 	}
 }
 
