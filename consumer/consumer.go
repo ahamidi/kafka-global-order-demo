@@ -48,6 +48,7 @@ func (c *Consumer) Consume(inOrder bool, timeWindow *time.Time) {
 	c.Close()
 }
 
+// discard everything but message events
 func (c *Consumer) filterMessages(messages chan kafka.Message) {
 	for {
 		select {
