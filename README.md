@@ -3,10 +3,17 @@
 A simple demo that provides an example of how global ordering across partitions
 can be implemented using a sliding window.
 
+## Requirements
+
+* Kafka running locally
+* (Ideally) a topic named `messages` with multiple partitions
+
 ## Build
 
 ```
-go build ./...
+go get -u ./...
+cd cmd/consumer && go build .
+cd ../generator && go build .
 ```
 
 ## Run
