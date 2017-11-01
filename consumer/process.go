@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/ahamidi/kafka-global-order-demo/window"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/fatih/color"
 )
@@ -19,8 +20,28 @@ func processMessages(in chan kafka.Message) {
 
 // Reorders messages based on timestamp and discards any that arrive outside of
 // the time window
-func processMessagesInOrder(in chan kafka.Message, timeWindow *time.Time) {
+func processMessagesInOrder(in chan kafka.Message, timeWindow time.Duration) {
+	w := window.New(100, timeWindow)
 
+	go func() {
+		var lastMessage kafka.Message
+		for batch := range w.Out {
+			for _, m := range batch {
+				printMessage(&lastMessage, m.Value.(kafka.Message))
+				lastMessage = m.Value.(kafka.Message)
+			}
+		}
+	}()
+
+	for m := range in {
+		w.Insert(&window.Element{
+			Timestamp: m.Timestamp,
+			Value:     m,
+		})
+
+	}
+
+	w.Close()
 }
 
 func printMessage(lastMessage *kafka.Message, currentMessage kafka.Message) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/ahamidi/kafka-global-order-demo/config"
@@ -33,7 +34,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Start consuming
-	c.Consume(false, nil)
-
+	if os.Getenv("IN_ORDER") != "" {
+		tw := TimeWindowMilliseconds
+		c.Consume(true, &tw)
+	} else {
+		c.Consume(false, nil)
+	}
 }

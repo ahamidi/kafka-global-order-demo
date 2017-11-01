@@ -28,7 +28,7 @@ func New(c *kafka.ConfigMap, topic string, clientID string) (*Consumer, error) {
 }
 
 // Consume message from Topic. This is blocking.
-func (c *Consumer) Consume(inOrder bool, timeWindow *time.Time) {
+func (c *Consumer) Consume(inOrder bool, timeWindow *time.Duration) {
 	err := c.Subscribe(c.Topic, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +40,7 @@ func (c *Consumer) Consume(inOrder bool, timeWindow *time.Time) {
 
 	// This will block
 	if inOrder {
-		processMessagesInOrder(msgChan, timeWindow)
+		processMessagesInOrder(msgChan, *timeWindow)
 	} else {
 		processMessages(msgChan)
 	}
