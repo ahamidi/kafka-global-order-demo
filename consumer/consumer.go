@@ -15,8 +15,7 @@ type Consumer struct {
 
 // New returns a new Consumer.
 func New(c *kafka.ConfigMap, topic string, clientID string) (*Consumer, error) {
-	err := c.SetKey("group.id", clientID)
-	if err != nil {
+	if err := c.SetKey("group.id", clientID); err != nil {
 		return nil, err
 	}
 	consumer, err := kafka.NewConsumer(c)
@@ -29,13 +28,13 @@ func New(c *kafka.ConfigMap, topic string, clientID string) (*Consumer, error) {
 
 // Consume message from Topic. This is blocking.
 func (c *Consumer) Consume(inOrder bool, timeWindow *time.Duration) {
-	err := c.Subscribe(c.Topic, nil)
-	if err != nil {
+	if err := c.Subscribe(c.Topic, nil); err != nil {
 		log.Fatal(err)
 	}
 
 	// Only messages will be pushed to this channel
 	msgChan := make(chan kafka.Message)
+	defer close(msgChan)
 	go c.filterMessages(msgChan)
 
 	// This will block
@@ -50,20 +49,17 @@ func (c *Consumer) Consume(inOrder bool, timeWindow *time.Duration) {
 
 // discard everything but message events
 func (c *Consumer) filterMessages(messages chan kafka.Message) {
-	for {
-		select {
-		case ev := <-c.Events():
-			switch e := ev.(type) {
-			case kafka.AssignedPartitions:
-				c.Assign(e.Partitions)
-			case kafka.RevokedPartitions:
-				c.Unassign()
-			case *kafka.Message:
-				messages <- *e
-			case kafka.Error:
-				log.Println("Error:", e)
-				break
-			}
+	for ev := range c.Events() {
+		switch e := ev.(type) {
+		case kafka.AssignedPartitions:
+			c.Assign(e.Partitions)
+		case kafka.RevokedPartitions:
+			c.Unassign()
+		case *kafka.Message:
+			messages <- *e
+		case kafka.Error:
+			log.Println("Error:", e)
+			break
 		}
 	}
 }
