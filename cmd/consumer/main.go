@@ -20,7 +20,7 @@ import (
 
 const (
 	TimeWindow = 10 * time.Second
-	Brokers    = "kafka://localhost:9092"
+	Brokers    = "kafka://localhost:9092" // Comma seperated list fo Kafka broker URLs
 )
 
 func main() {
