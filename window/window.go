@@ -41,14 +41,14 @@ func New(slotCount int, windowSize time.Duration) *Window {
 		Out:        outChan,
 		windowSize: windowSize,
 		oldest:     time.Now().UTC().Add(-(windowSize / 2)),
-		//oldest: time.Now().UTC(),
-		ticker: ticker,
+		ticker:     ticker,
 	}
 
 	go func() {
 		for range ticker.C {
 			outChan <- w.pop()
 		}
+		close(outChan)
 	}()
 
 	return w
