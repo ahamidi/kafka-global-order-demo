@@ -19,8 +19,8 @@ import (
 // any messages that are delayed beyond our chosen time window.
 
 const (
-	TimeWindowMilliseconds = 10 * time.Second
-	Brokers                = "kafka://localhost:9092"
+	TimeWindow = 10 * time.Second
+	Brokers    = "kafka://localhost:9092"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	if os.Getenv("IN_ORDER") != "" {
-		tw := TimeWindowMilliseconds
+		tw := TimeWindow
 		c.Consume(true, &tw)
 	} else {
 		c.Consume(false, nil)
